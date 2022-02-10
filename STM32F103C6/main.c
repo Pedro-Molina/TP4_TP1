@@ -14,7 +14,6 @@
 #include <mef.h>
 #include <delay.h>
 #include <timer.h>
-#include <usart.h>
 #include "lcd.h"
 #include "stdlib.h"
 

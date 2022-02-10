@@ -17,6 +17,7 @@ static uint8_t hora=0,min=0,seg=0,cantTiempo = 9;
 static uint8_t stringTime[8]= {'0','0',':','0','0',':','0','0'};
 
 int num=0;
+int mensaje;
 int num_digits;
 unsigned char snum[6];
 
@@ -86,7 +87,8 @@ void MEF_Update(){
 		cantTiempo =0;
 	}
 	//SI LLEGO MENSAJE
-	if(getLlegoMensaje()){
+    mensaje=getLlegoMensaje();
+	if(mensaje){
 	switch(actual_state){
 		case invalido:
 			processInvalido();

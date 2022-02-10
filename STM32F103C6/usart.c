@@ -66,5 +66,3 @@ uint8_t* getTX_Buffer(){
 uint8_t getTXindice_escritura(){
    return TXindice_escritura;
    }
-
-
