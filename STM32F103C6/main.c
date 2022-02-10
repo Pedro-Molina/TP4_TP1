@@ -9,28 +9,56 @@
 #include "dc_motor.h"
 #include "delay.h"
 #include "adc.h"
+#include "stdio.h"
+#include <usart.h>
+#include <mef.h>
+#include <delay.h>
+#include <timer.h>
+#include <usart.h>
+#include "lcd.h"
+#include "stdlib.h"
 
 volatile uint32_t result;
+static volatile char prueba[]= "odio proteus";
 
-int main()
+
+void USART1_IRQHandler() { /* USART1 interrupt routine */
+char c = USART1->DR; /* get received data */
+ if (c != '\n'){
+	   if (c == '\r'){  //SI ES CARACTER DE FIN DE CADENA
+	            if (getTXindice_escritura() >0){
+                    usart1_Write_Char_To_Buffer('\0');
+                    } else {
+                              usart1_Write_Char_To_Buffer('\r');
+                              usart1_Write_Char_To_Buffer('\0');
+               }
+	            setLlegoMensaje(1); //llegoMensaje=1;
+	            setTXindice_escritura(0);
+	            } else {
+		             usart1_Write_Char_To_Buffer(c); // AGREGO AL BUFFER
+	           }
+   }
+ }
+
+int main (void)
 {
-	RCC->APB2ENR|= 0xFC | (1<<9) | (1<<14) | (1<<11); //enable clock for GPIO, ADC1 clock, usart1 and TIM1.
-	//RCC->APB1ENR |= (1<<0);
-	//RCC->APB1ENR |= (1<<0); 	/* enable TIM2 clock */
-	//GPIOA ->CRL |= 0x44444330; 	/* PA1,PA2: output push-pull - PA0 analog input*/
-	init_RC();
-	//medirRC();
-	//dc_motor_clockwise();
-	delay_us(1000);
-	//dc_motor_anticlockwise();
-	//delay_us(1000000);
-	//dc_motor_stop();
+	//RCC->APB2ENR|= 0xFC | (1<<9) | (1<<14) | (1<<11); //enable clock for GPIO, ADC1 clock, usart1 and TIM1.
+	//GPIOA ->CRL |= 0x44443304; 	/* PA2,PA3: output push-pull - PA1 analog input*/
+	timer_init();
+   RCC->APB2ENR |= 0xFC | (1<<14) ; //enable clock for GPIO, USART1
 
-	
-	while(1)
-	{
-		result = ADC_GetInputInmV();
-		delay_us(100);
-	}
-}
 
+   lcd_init();
+   usart1_init();
+   MEF_Init();
+   delay_us(1000);
+   usart1_sendStr("\r\n BIENVENIDO AL SISTEMA AUTOMATICO DE ILUMINACION \n Para conocer el porcentaje de iluminacion del cuarto ingrese CONOCER PORCENTAJE \r\n Para modificar el porcentaje de iluminacion ingrese CAMBIAR PORCENTAJE \r\n \0");
+   while(1){
+      //SI TIMER DE 1 SEGUNDO SE ACTIVO
+        //ACTUALIZAR HORA
+       if (timer_getFlag()){
+	      MEF_Update();
+	      timer_resetFlag();
+	      }     
+      }
+}   

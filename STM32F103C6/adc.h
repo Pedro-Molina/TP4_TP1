@@ -4,7 +4,7 @@
 //#include <lcd.h>
 #include <math.h>
 
-void init_RC(void);
-uint32_t ADC_GetInputInmV(void);
+void adc_init(void);
+uint32_t adc_read(void);
 
 
