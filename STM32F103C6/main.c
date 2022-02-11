@@ -12,10 +12,9 @@
 #include "stdio.h"
 #include <usart.h>
 #include <mef.h>
-#include <delay.h>
 #include <timer.h>
-#include "lcd.h"
 #include "stdlib.h"
+#include "lcd4bits.h"
 
 volatile uint32_t result;
 static volatile char prueba[]= "odio proteus";
@@ -42,12 +41,14 @@ char c = USART1->DR; /* get received data */
 int main (void)
 {
 	//RCC->APB2ENR|= 0xFC | (1<<9) | (1<<14) | (1<<11); //enable clock for GPIO, ADC1 clock, usart1 and TIM1.
-	//GPIOA ->CRL |= 0x44443304; 	/* PA2,PA3: output push-pull - PA1 analog input*/
+	
 	timer_init();
-   RCC->APB2ENR |= 0xFC | (1<<14) ; //enable clock for GPIO, USART1
+   RCC->APB2ENR |= 0xFC | (1<<9) | (1<<14) ; //enable clock for GPIO, USART1
+   GPIOA ->CRL |= 0x44443304; 	/* PA2,PA3: output push-pull - PA1 analog input*/
 
 
-   lcd_init();
+   LCDinit();
+   adc_init();
    usart1_init();
    MEF_Init();
    delay_us(1000);

@@ -4,7 +4,9 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-#include "lcd.h"
+#include "lcd4bits.h"
+#include "adc.h"
+#include "dc_motor.h"
 
 typedef enum {invalido,ingresar_porcentaje} state_name;
 	
@@ -12,15 +14,19 @@ typedef enum {invalido,ingresar_porcentaje} state_name;
 
 //Variables Privadas
 static state_name actual_state;
-static valor_LDR = 1;
+static uint32_t valor_LDR = (uint32_t) MAXLUX*0.33;
 //static uint8_t time_state= 0;
 static uint8_t hora=0,min=0,seg=0,cantTiempo = 9;
 static uint8_t stringTime[8]= {'0','0',':','0','0',':','0','0'};
+unsigned char* opcionIntensidad[3]={"BAJA",",MEDIA\0","ALTA\0"};
+uint8_t opcionBytes[3]={4,7,6};
+uint8_t opcion=0;
 
 int num=0;
 int mensaje;
 int num_digits;
 unsigned char snum[6];
+uint32_t datoADC;
 
 //funciones privadas
 void actualizarTiempo(void);
@@ -29,6 +35,15 @@ uint8_t verificarStringValido(unsigned char*);
 void processInvalido(void);
 void processIngresarPorcentaje(void);
 void processConsultarPorcentaje(void);
+
+uint32_t rangoAceptable(uint32_t adc, uint32_t valor){
+if(adc > valor-((uint32_t) MAXLUX*RANGO)){
+    if(adc <valor+((uint32_t)MAXLUX*RANGO)){
+         return 1;
+    }
+}
+return 0;
+}
 
 char* itoa(int num, char* buffer, int base) {
     int curr = 0;
@@ -82,11 +97,26 @@ void MEF_Init(){
 
 
 void MEF_Update(){
-         if (++cantTiempo == 40){	//actualizo cada 1s
+    if (++cantTiempo == 40){	//actualizo cada 1s
 		actualizarTiempo();
 		prepararHora();
 		cantTiempo =0;
 	}
+
+    datoADC=adc_read();  //LEO LA RESISTENCIA
+    if(rangoAceptable(datoADC,valor_LDR)){ //SI LA RESISTENCIA ES IGIUAL A LCDREAD O CERCA
+    //NO SE MUEVE
+    dc_motor_stop();
+    }else{
+    //SE MUEVE
+    if(datoADC>valor_LDR){
+       dc_motor_clockwise();
+     }else{
+       dc_motor_anticlockwise();
+     }
+}
+      
+
 	//SI LLEGO MENSAJE
     mensaje=getLlegoMensaje();
 	if(mensaje){
@@ -112,8 +142,11 @@ void prepararHora(){
 	stringTime[6] = ((seg/10)% 10) + '0';
 
 	//imprimir la hora en el led
-	lcd_gotoXY(0, 0);
-	lcd_string(stringTime, 8);
+	LCDGotoXY(0, 0);
+	LCDstring(stringTime, 8);
+    //LCDGotoXY(0, 1);
+    //LCDstring("BAJA",4);
+	//LCDstring(opcionIntensidad[opcion], opcionBytes[opcion]);
 	
 }
 void actualizarTiempo(){
@@ -137,14 +170,17 @@ uint8_t verificarStringValido(unsigned char* str){
 	 usart1_sendStr("buffer: ");
 	 usart1_sendStr(str);
      usart1_sendStr("\r\n\0");
-	if(strncmp(str,"CONOCER PORCENTAJE\0",(sizeof(unsigned char))*22) == 0){
-	   usart1_sendStr("EL PORCENTAJE DE ILUMINACION ES: X \r\n\0");
+	if(strncmp(str,"CONOCER INTENSIDAD\0",(sizeof(unsigned char))*22) == 0){
+	   usart1_sendStr("LA INTENSIDAD ES: \0");
+       usart1_sendStr(opcionIntensidad[opcion]);
+	   usart1_sendStr("\r\n\0");
 	   actual_state=invalido;
 	   return 0;
 	   }else{
 	      if(strncmp(str,"ELEGIR INTENSIDAD\0",(sizeof(unsigned char))*22) == 0){
 		 actual_state=ingresar_porcentaje;
-		 usart1_sendStr("1. BAJA LUMINOSIDAD\r\n 2.LUMINOSIDAD MEDIA\r\n 3.LUMINOSIDAD ALTA\r\n\0" );
+         usart1_sendStr("ELIJA UNA OPCION: \r\n\0" );
+		 usart1_sendStr(" 1.LUMINOSIDAD BAJA \r\n 2.LUMINOSIDAD MEDIA\r\n 3.LUMINOSIDAD ALTA\r\n\0" );
 		 return 0;
 		 }
        }
@@ -155,7 +191,7 @@ uint8_t verificarStringValido(unsigned char* str){
 
 void processInvalido(){
    if(verificarStringValido(getTX_Buffer())){
-      usart1_sendStr("\r\n BIENVENIDO AL SISTEMA AUTOMATICO DE ILUMINACION \r\n Para conocer el porcentaje de iluminacion del cuarto ingrese CONOCER INTESIDAD \r\n Para modificar el porcentaje de iluminacion ingrese CAMBIAR PORCENTAJE \r\n \0");
+      usart1_sendStr("\r\n BIENVENIDO AL SISTEMA AUTOMATICO DE ILUMINACION \r\n Para conocer la intensidad de iluminacion del cuarto ingrese CONOCER INTENSIDAD \r\n Para modificar la intensidad de iluminacion ingrese ELEGIR INTENSIDAD \r\n \0");
       }
    
 }
@@ -168,24 +204,24 @@ void processIngresarPorcentaje(){
 					switch(num) 
 					{
 						case 1 : 
-							valor_LDR= 100;
+							valor_LDR= MAXLUX*0.33; opcion=0; usart1_sendStr("OPCION VALIDA: Su intensidad de iluminacion es BAJA \0");
 						break;
 						case 2: 
-							valor_LDR = 200;
+							valor_LDR = MAXLUX*0.66; opcion=1; usart1_sendStr("OPCION VALIDA: Su intensidad de iluminacion es MEDIA\0");
 						break;
 						case 3: 
-							valor_LDR = 300;
+							valor_LDR = MAXLUX; opcion=2; usart1_sendStr("OPCION VALIDA: Su intensidad de iluminacion es ALTA\0");
 						break;
 					}
-                     usart1_sendStr("OPCION VALIDA: Su intensidad de iluminacion es \0");
-			         itoa(num,snum,10);
-			         usart1_sendStr(snum);
+                     
+			         //itoa(num,snum,10);
+			         //usart1_sendStr(snum);
 			         usart1_sendStr("\r\n\0");
 					 flag=1;
                      actual_state=invalido;
                   }
               }
-			  if(!flag) usart1_sendStr("NUMERO INVALIDO Por favor ingrese nuevamente un numero entre 1 y 3 \r\n \0");
+			  if(!flag) usart1_sendStr("NUMERO INVALIDO Por favor ingrese nuevamente una opcion entre 1 y 3 \r\n \0");
 }
 
 
