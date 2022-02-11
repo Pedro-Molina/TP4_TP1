@@ -14,6 +14,5 @@ void setTXindice_escritura(uint8_t d);
 uint8_t getTXindice_escritura(void);
 void usart1_Write_Char_To_Buffer(char data);
 uint8_t getLlegoMensaje(void);
-//void USART1_IRQHandler(void);
 
 

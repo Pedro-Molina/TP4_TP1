@@ -12,6 +12,7 @@ typedef enum {invalido,ingresar_porcentaje} state_name;
 
 //Variables Privadas
 static state_name actual_state;
+static valor_LDR = 1;
 //static uint8_t time_state= 0;
 static uint8_t hora=0,min=0,seg=0,cantTiempo = 9;
 static uint8_t stringTime[8]= {'0','0',':','0','0',':','0','0'};
@@ -141,9 +142,9 @@ uint8_t verificarStringValido(unsigned char* str){
 	   actual_state=invalido;
 	   return 0;
 	   }else{
-	      if(strncmp(str,"CAMBIAR PORCENTAJE\0",(sizeof(unsigned char))*22) == 0){
+	      if(strncmp(str,"ELEGIR INTENSIDAD\0",(sizeof(unsigned char))*22) == 0){
 		 actual_state=ingresar_porcentaje;
-		 usart1_sendStr("INGRESE UN VALOR DE ILUMINACION DE 0-100:  \n \0");
+		 usart1_sendStr("1. BAJA LUMINOSIDAD\r\n 2.LUMINOSIDAD MEDIA\r\n 3.LUMINOSIDAD ALTA\r\n\0" );
 		 return 0;
 		 }
        }
@@ -154,7 +155,7 @@ uint8_t verificarStringValido(unsigned char* str){
 
 void processInvalido(){
    if(verificarStringValido(getTX_Buffer())){
-      usart1_sendStr("\r\n BIENVENIDO AL SISTEMA AUTOMATICO DE ILUMINACION \r\n Para conocer el porcentaje de iluminacion del cuarto ingrese CONOCER PORCENTAJE \r\n Para modificar el porcentaje de iluminacion ingrese CAMBIAR PORCENTAJE \r\n \0");
+      usart1_sendStr("\r\n BIENVENIDO AL SISTEMA AUTOMATICO DE ILUMINACION \r\n Para conocer el porcentaje de iluminacion del cuarto ingrese CONOCER INTESIDAD \r\n Para modificar el porcentaje de iluminacion ingrese CAMBIAR PORCENTAJE \r\n \0");
       }
    
 }
@@ -163,8 +164,20 @@ void processIngresarPorcentaje(){
    int flag=0;
    num=atoi(getTX_Buffer());
 			if(num > 0){
-                 if(num<100){
-                     usart1_sendStr("NUMERO VALIDO: Su porcentaje de iluminacion es: \0");
+                 if(num<4){
+					switch(num) 
+					{
+						case 1 : 
+							valor_LDR= 100;
+						break;
+						case 2: 
+							valor_LDR = 200;
+						break;
+						case 3: 
+							valor_LDR = 300;
+						break;
+					}
+                     usart1_sendStr("OPCION VALIDA: Su intensidad de iluminacion es \0");
 			         itoa(num,snum,10);
 			         usart1_sendStr(snum);
 			         usart1_sendStr("\r\n\0");
@@ -172,7 +185,7 @@ void processIngresarPorcentaje(){
                      actual_state=invalido;
                   }
               }
-			  if(!flag) usart1_sendStr("NUMERO INVALIDO Por favor ingrese nuevamente un numero entre 0 y 100 \r\n \0");
+			  if(!flag) usart1_sendStr("NUMERO INVALIDO Por favor ingrese nuevamente un numero entre 1 y 3 \r\n \0");
 }
 
 
