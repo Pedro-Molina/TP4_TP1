@@ -10,18 +10,18 @@
 #include "delay.h"
 #include "adc.h"
 
-
+volatile uint32_t result;
 
 int main()
 {
-	RCC->APB2ENR |= 0xFC | (1<<9) | (1<<14); 	/* enable GPIO clocks */
-	RCC->APB1ENR |= (1<<0);
+	RCC->APB2ENR|= 0xFC | (1<<9) | (1<<14) | (1<<11); //enable clock for GPIO, ADC1 clock, usart1 and TIM1.
+	//RCC->APB1ENR |= (1<<0);
 	//RCC->APB1ENR |= (1<<0); 	/* enable TIM2 clock */
-	GPIOA ->CRL |= 0x44444330; 	/* PA1,PA2: output push-pull - PA0 analog input*/
+	//GPIOA ->CRL |= 0x44444330; 	/* PA1,PA2: output push-pull - PA0 analog input*/
 	init_RC();
 	//medirRC();
 	//dc_motor_clockwise();
-	//delay_us(1000000);
+	delay_us(1000);
 	//dc_motor_anticlockwise();
 	//delay_us(1000000);
 	//dc_motor_stop();
@@ -29,8 +29,8 @@ int main()
 	
 	while(1)
 	{
-		medirRC();
-		delay_us(1000);
+		result = ADC_GetInputInmV();
+		delay_us(100);
 	}
 }
 

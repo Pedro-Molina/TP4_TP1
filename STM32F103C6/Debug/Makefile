@@ -7,11 +7,11 @@ PROJECT =
 MCU = STM32F103C6
 COMPILER = "Keil for ARM"
 TARGET = Debug
-SHELL = C:\WINDOWS\system32\cmd.exe
+SHELL = C:\Windows\system32\cmd.exe
 
 ## Tools general options
 ASMFLAGS=--cpu=cortex-m3 --thumb -g
-CCFLAGS=--cpu=cortex-m3 --thumb -I.. -I../../../../../../Keil_v5/ARM/CMSIS/Include -g
+CCFLAGS=--cpu=cortex-m3 --thumb -I.. -I../../../../../../../Keil_v5/ARM/CMSIS/Include -g
 LDFLAGS=--scatter ../stm32f103x6.sct
 
 ## Processing Tools
@@ -19,19 +19,19 @@ CC=armcc.exe
 LD=armlink.exe
 ASM=armasm.exe
 BIN2HEX=fromelf.exe
-#  C:/Users/molin/Documents/TP4/STM32F103C6/Debug/Debug.elf: TOOL=LD
-#     C:/Users/molin/Documents/TP4/STM32F103C6/Debug/main.o: TOOL=CC
-#        C:/Users/molin/Documents/TP4/STM32F103C6/main.c
-#     C:/Users/molin/Documents/TP4/STM32F103C6/Debug/SYSTEM~1.o: TOOL=CC
-#        C:/Users/molin/Documents/TP4/STM32F103C6/system_stm32f1xx.c
-#     C:/Users/molin/Documents/TP4/STM32F103C6/Debug/STARTU~1.o: TOOL=ASM
-#        C:/Users/molin/Documents/TP4/STM32F103C6/startup_stm32f103.s
-#     C:/Users/molin/Documents/TP4/STM32F103C6/Debug/dc_motor.o: TOOL=CC
-#        C:/Users/molin/Documents/TP4/STM32F103C6/dc_motor.c
-#     C:/Users/molin/Documents/TP4/STM32F103C6/Debug/delay.o: TOOL=CC
-#        C:/Users/molin/Documents/TP4/STM32F103C6/delay.c
-#     C:/Users/molin/Documents/TP4/STM32F103C6/Debug/adc.o: TOOL=CC
-#        C:/Users/molin/Documents/TP4/STM32F103C6/adc.c
+#  C:/Users/evari/Desktop/Repo Pedrito/TP4_TP1/STM32F103C6/Debug/Debug.elf: TOOL=LD
+#     C:/Users/evari/Desktop/Repo Pedrito/TP4_TP1/STM32F103C6/Debug/main.o: TOOL=CC
+#        C:/Users/evari/Desktop/Repo Pedrito/TP4_TP1/STM32F103C6/main.c
+#     C:/Users/evari/Desktop/Repo Pedrito/TP4_TP1/STM32F103C6/Debug/SYSTEM~1.o: TOOL=CC
+#        C:/Users/evari/Desktop/Repo Pedrito/TP4_TP1/STM32F103C6/system_stm32f1xx.c
+#     C:/Users/evari/Desktop/Repo Pedrito/TP4_TP1/STM32F103C6/Debug/STARTU~1.o: TOOL=ASM
+#        C:/Users/evari/Desktop/Repo Pedrito/TP4_TP1/STM32F103C6/startup_stm32f103.s
+#     C:/Users/evari/Desktop/Repo Pedrito/TP4_TP1/STM32F103C6/Debug/dc_motor.o: TOOL=CC
+#        C:/Users/evari/Desktop/Repo Pedrito/TP4_TP1/STM32F103C6/dc_motor.c
+#     C:/Users/evari/Desktop/Repo Pedrito/TP4_TP1/STM32F103C6/Debug/delay.o: TOOL=CC
+#        C:/Users/evari/Desktop/Repo Pedrito/TP4_TP1/STM32F103C6/delay.c
+#     C:/Users/evari/Desktop/Repo Pedrito/TP4_TP1/STM32F103C6/Debug/adc.o: TOOL=CC
+#        C:/Users/evari/Desktop/Repo Pedrito/TP4_TP1/STM32F103C6/adc.c
 
 # Build tree:
 all:	Debug

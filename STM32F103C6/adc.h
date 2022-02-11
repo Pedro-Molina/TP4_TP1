@@ -5,6 +5,6 @@
 #include <math.h>
 
 void init_RC(void);
-void medirRC(void);
+uint32_t ADC_GetInputInmV(void);
 
 
