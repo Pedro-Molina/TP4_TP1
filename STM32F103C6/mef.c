@@ -22,7 +22,7 @@ unsigned char* opcionIntensidad[3]={"BAJA",",MEDIA\0","ALTA\0"};
 uint8_t opcionBytes[3]={4,7,6};
 uint8_t opcion=0;
 
-int num=0;
+char num='0';
 int mensaje;
 int num_digits;
 unsigned char snum[6];
@@ -172,6 +172,7 @@ uint8_t verificarStringValido(unsigned char* str){
      usart1_sendStr("\r\n\0");
 	if(strncmp(str,"CONOCER INTENSIDAD\0",(sizeof(unsigned char))*22) == 0){
 	   usart1_sendStr("LA INTENSIDAD ES: \0");
+		//ilum = ((long)V*A*10)/((long)B*Rc*(1024-V))
        usart1_sendStr(opcionIntensidad[opcion]);
 	   usart1_sendStr("\r\n\0");
 	   actual_state=invalido;
@@ -197,31 +198,38 @@ void processInvalido(){
 }
 
 void processIngresarPorcentaje(){
-   int flag=0;
-   num=atoi(getTX_Buffer());
-			if(num > 0){
-                 if(num<4){
+	int comando_invalido = 1;
+   num=getTX_Buffer()[0];
+					LCDGotoXY(0, 1);
+					
 					switch(num) 
 					{
-						case 1 : 
+						case '1' : 
 							valor_LDR= MAXLUX*0.33; opcion=0; usart1_sendStr("OPCION VALIDA: Su intensidad de iluminacion es BAJA \0");
+							LCDstring("BAJA ",4);
+							//LCDstring(opcionIntensidad[opcion], opcionBytes[opcion]);
 						break;
-						case 2: 
+						case '2': 
 							valor_LDR = MAXLUX*0.66; opcion=1; usart1_sendStr("OPCION VALIDA: Su intensidad de iluminacion es MEDIA\0");
+							LCDstring("MEDIA",5);
 						break;
-						case 3: 
+						case '3': 
 							valor_LDR = MAXLUX; opcion=2; usart1_sendStr("OPCION VALIDA: Su intensidad de iluminacion es ALTA\0");
+							LCDstring("ALTA ",4);
 						break;
+						default:
+						 //itoa(num,snum,10);
+						 //usart1_sendStr(snum);
+						usart1_sendStr("NUMERO INVALIDO Por favor ingrese nuevamente una opcion entre 1 y 3 \r\n \0");
+						comando_invalido = 0;
+						break;
+					} 
+					if (comando_invalido) {
+						usart1_sendStr("\r\n\0");
+						actual_state=invalido;
+
 					}
-                     
-			         //itoa(num,snum,10);
-			         //usart1_sendStr(snum);
-			         usart1_sendStr("\r\n\0");
-					 flag=1;
-                     actual_state=invalido;
-                  }
-              }
-			  if(!flag) usart1_sendStr("NUMERO INVALIDO Por favor ingrese nuevamente una opcion entre 1 y 3 \r\n \0");
+					
 }
 
 

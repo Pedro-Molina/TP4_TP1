@@ -10,14 +10,15 @@
 #include "delay.h"
 #include "adc.h"
 #include "stdio.h"
-#include <usart.h>
-#include <mef.h>
-#include <timer.h>
+#include "usart.h"
+#include "mef.h"
+#include "timer.h"
 #include "stdlib.h"
 #include "lcd4bits.h"
 
 volatile uint32_t result;
 static volatile char prueba[]= "odio proteus";
+static uint8_t flag_mef = 0;
 
 
 void USART1_IRQHandler() { /* USART1 interrupt routine */
@@ -52,11 +53,11 @@ int main (void)
    usart1_init();
    MEF_Init();
    delay_us(1000);
-   usart1_sendStr("\r\n BIENVENIDO AL SISTEMA AUTOMATICO DE ILUMINACION \n Para conocer el porcentaje de iluminacion del cuarto ingrese CONOCER PORCENTAJE \r\n Para modificar el porcentaje de iluminacion ingrese CAMBIAR PORCENTAJE \r\n \0");
-   while(1){
+usart1_sendStr("\r\n BIENVENIDO AL SISTEMA AUTOMATICO DE ILUMINACION \r\n Para conocer la intensidad de iluminacion del cuarto ingrese CONOCER INTENSIDAD \r\n Para modificar la intensidad de iluminacion ingrese ELEGIR INTENSIDAD \r\n \0");   while(1){
       //SI TIMER DE 1 SEGUNDO SE ACTIVO
         //ACTUALIZAR HORA
-       if (timer_getFlag()){
+		flag_mef = timer_getFlag();
+       if (flag_mef){
 	      MEF_Update();
 	      timer_resetFlag();
 	      }     
