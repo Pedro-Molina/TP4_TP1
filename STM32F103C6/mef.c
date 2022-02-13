@@ -8,9 +8,6 @@
 #include "adc.h"
 #include "dc_motor.h"
 
-#define A 1000;     //Resistencia en oscuridad en KO // pedrito
-#define B 17;        //Resistencia a la luz (10 Lux) en KO
-#define Rc 10;       //Resistencia calibracion en KO
 
 typedef enum {invalido,ingresar_porcentaje} state_name;
 
@@ -22,7 +19,7 @@ static uint32_t valor_LDR = (uint32_t) MAXLUX*0.33;
 //static uint8_t time_state= 0;
 static uint8_t hora=0,min=0,seg=0,cantTiempo = 9;
 static uint8_t stringTime[8]= {'0','0',':','0','0',':','0','0'};
-unsigned char* opcionIntensidad[3]={"BAJA\0","MEDIA\0","ALTA\0"};
+unsigned char* opcionIntensidad[3]={"BAJA \0","MEDIA\0","ALTA \0"};
 uint8_t opcionBytes[3]={4,7,6};
 uint8_t opcion=0;
 
@@ -32,7 +29,6 @@ int num_digits;
 unsigned char snum[6];
 uint32_t datoADC;
 
-volatile	float ilum = 0;//pedrito
 
 //funciones privadas
 void actualizarTiempo(void);
@@ -103,7 +99,7 @@ void MEF_Init(){
 
 
 void MEF_Update(){
-    if (++cantTiempo == 40){	//actualizo cada 1s
+    if (++cantTiempo == 10){	//actualizo cada 1s
 		actualizarTiempo();
 		prepararHora();
 		cantTiempo =0;
@@ -169,7 +165,6 @@ void actualizarTiempo(){
 
 //RETORNA 1 SI ES INVALIDO Y 0 SI NO ES ESTADO INVALIDO
 uint8_t verificarStringValido(unsigned char* str){
-	uint32_t V = adc_read();//pedrito
 	 usart1_sendStr("buffer: ");
 	 usart1_sendStr(str);
      usart1_sendStr("\r\n\0");
@@ -208,16 +203,15 @@ void processIngresarPorcentaje(){
 					{
 						case '1' : 
 							valor_LDR= MAXLUX*0.33; opcion=0; usart1_sendStr("OPCION VALIDA: Su intensidad de iluminacion es BAJA \0");
-							LCDstring("Luminosidad: BAJA ",4);
-							//LCDstring(opcionIntensidad[opcion], opcionBytes[opcion]);
+							LCDstring("BAJA ",5);
 						break;
 						case '2': 
 							valor_LDR = MAXLUX*0.66; opcion=1; usart1_sendStr("OPCION VALIDA: Su intensidad de iluminacion es MEDIA\0");
-							LCDstring("Luminosidad: MEDIA",5);
+							LCDstring("MEDIA",5);
 						break;
 						case '3': 
 							valor_LDR = MAXLUX; opcion=2; usart1_sendStr("OPCION VALIDA: Su intensidad de iluminacion es ALTA\0");
-							LCDstring("Luminosidad: ALTA ",4);
+							LCDstring("ALTA ",5);
 						break;
 						default:
 						 //itoa(num,snum,10);

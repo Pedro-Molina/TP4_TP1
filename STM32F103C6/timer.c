@@ -7,7 +7,7 @@
 static volatile uint8_t flag = 0;
 
 void timer_init(){
-	SysTick_Config (1800000);		//timer cada 25 ms con 1 mhz de frecuencia 1800000
+	SysTick_Config (7200000);		//timer cada 25 ms con 1 mhz de frecuencia 1800000
 }
 
 uint8_t timer_getFlag(){
