@@ -8,8 +8,12 @@
 #include "adc.h"
 #include "dc_motor.h"
 
+#define A 1000;     //Resistencia en oscuridad en KO // pedrito
+#define B 17;        //Resistencia a la luz (10 Lux) en KO
+#define Rc 10;       //Resistencia calibracion en KO
+
 typedef enum {invalido,ingresar_porcentaje} state_name;
-	
+
 //constantes
 
 //Variables Privadas
@@ -18,7 +22,7 @@ static uint32_t valor_LDR = (uint32_t) MAXLUX*0.33;
 //static uint8_t time_state= 0;
 static uint8_t hora=0,min=0,seg=0,cantTiempo = 9;
 static uint8_t stringTime[8]= {'0','0',':','0','0',':','0','0'};
-unsigned char* opcionIntensidad[3]={"BAJA",",MEDIA\0","ALTA\0"};
+unsigned char* opcionIntensidad[3]={"BAJA\0","MEDIA\0","ALTA\0"};
 uint8_t opcionBytes[3]={4,7,6};
 uint8_t opcion=0;
 
@@ -27,6 +31,8 @@ int mensaje;
 int num_digits;
 unsigned char snum[6];
 uint32_t datoADC;
+
+volatile	float ilum = 0;//pedrito
 
 //funciones privadas
 void actualizarTiempo(void);
@@ -144,10 +150,6 @@ void prepararHora(){
 	//imprimir la hora en el led
 	LCDGotoXY(0, 0);
 	LCDstring(stringTime, 8);
-    //LCDGotoXY(0, 1);
-    //LCDstring("BAJA",4);
-	//LCDstring(opcionIntensidad[opcion], opcionBytes[opcion]);
-	
 }
 void actualizarTiempo(){
 
@@ -167,12 +169,12 @@ void actualizarTiempo(){
 
 //RETORNA 1 SI ES INVALIDO Y 0 SI NO ES ESTADO INVALIDO
 uint8_t verificarStringValido(unsigned char* str){
+	uint32_t V = adc_read();//pedrito
 	 usart1_sendStr("buffer: ");
 	 usart1_sendStr(str);
      usart1_sendStr("\r\n\0");
 	if(strncmp(str,"CONOCER INTENSIDAD\0",(sizeof(unsigned char))*22) == 0){
 	   usart1_sendStr("LA INTENSIDAD ES: \0");
-		//ilum = ((long)V*A*10)/((long)B*Rc*(1024-V))
        usart1_sendStr(opcionIntensidad[opcion]);
 	   usart1_sendStr("\r\n\0");
 	   actual_state=invalido;
@@ -206,16 +208,16 @@ void processIngresarPorcentaje(){
 					{
 						case '1' : 
 							valor_LDR= MAXLUX*0.33; opcion=0; usart1_sendStr("OPCION VALIDA: Su intensidad de iluminacion es BAJA \0");
-							LCDstring("BAJA ",4);
+							LCDstring("Luminosidad: BAJA ",4);
 							//LCDstring(opcionIntensidad[opcion], opcionBytes[opcion]);
 						break;
 						case '2': 
 							valor_LDR = MAXLUX*0.66; opcion=1; usart1_sendStr("OPCION VALIDA: Su intensidad de iluminacion es MEDIA\0");
-							LCDstring("MEDIA",5);
+							LCDstring("Luminosidad: MEDIA",5);
 						break;
 						case '3': 
 							valor_LDR = MAXLUX; opcion=2; usart1_sendStr("OPCION VALIDA: Su intensidad de iluminacion es ALTA\0");
-							LCDstring("ALTA ",4);
+							LCDstring("Luminosidad: ALTA ",4);
 						break;
 						default:
 						 //itoa(num,snum,10);
