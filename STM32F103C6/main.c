@@ -17,7 +17,6 @@
 #include "lcd4bits.h"
 
 volatile uint32_t result;
-static volatile char prueba[]= "odio proteus";
 static uint8_t flag_mef = 0;
 
 
