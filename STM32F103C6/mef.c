@@ -15,13 +15,14 @@ typedef enum {invalido,ingresar_porcentaje} state_name;
 
 //Variables Privadas
 static state_name actual_state;
-static uint32_t valor_LDR = (uint32_t) MAXLUX*0.33;
+static uint32_t valor_LDR[3][2]={{2154,0},{2817,2400},{9999,2910}} ;
+static uint8_t opcion=0;
 //static uint8_t time_state= 0;
 static uint8_t hora=0,min=0,seg=0,cantTiempo = 9;
 static uint8_t stringTime[8]= {'0','0',':','0','0',':','0','0'};
 unsigned char* opcionIntensidad[3]={"BAJA \0","MEDIA\0","ALTA \0"};
 uint8_t opcionBytes[3]={4,7,6};
-uint8_t opcion=0;
+
 
 char num='0';
 int mensaje;
@@ -37,10 +38,11 @@ uint8_t verificarStringValido(unsigned char*);
 void processInvalido(void);
 void processIngresarPorcentaje(void);
 void processConsultarPorcentaje(void);
+uint32_t rangoAceptable(uint32_t adc);
 
-uint32_t rangoAceptable(uint32_t adc, uint32_t valor){
-if(adc > valor-((uint32_t) MAXLUX*RANGO)){
-    if(adc <valor+((uint32_t)MAXLUX*RANGO)){
+uint32_t rangoAceptable(uint32_t adc){
+if(adc > valor_LDR[opcion][1]){
+    if(adc < valor_LDR[opcion][0]){
          return 1;
     }
 }
@@ -106,15 +108,15 @@ void MEF_Update(){
 	}
 
     datoADC=adc_read();  //LEO LA RESISTENCIA
-    if(rangoAceptable(datoADC,valor_LDR)){ //SI LA RESISTENCIA ES IGIUAL A LCDREAD O CERCA
+    if(rangoAceptable(datoADC)){ //SI LA RESISTENCIA ES IGIUAL A LCDREAD O CERCA
     //NO SE MUEVE
     dc_motor_stop();
     }else{
     //SE MUEVE
-    if(datoADC>valor_LDR){
-       dc_motor_clockwise();
+    if(datoADC>valor_LDR[opcion][0]){	//si e mayor al limite superior
+       dc_motor_clockwise();	//CIERRA
      }else{
-       dc_motor_anticlockwise();
+       dc_motor_anticlockwise(); //ABRE
      }
 }
       
@@ -202,15 +204,15 @@ void processIngresarPorcentaje(){
 					switch(num) 
 					{
 						case '1' : 
-							valor_LDR= MAXLUX*0.33; opcion=0; usart1_sendStr("OPCION VALIDA: Su intensidad de iluminacion es BAJA \0");
+							opcion=0; usart1_sendStr("OPCION VALIDA: Su intensidad de iluminacion es BAJA \0");
 							LCDstring("BAJA ",5);
 						break;
 						case '2': 
-							valor_LDR = MAXLUX*0.66; opcion=1; usart1_sendStr("OPCION VALIDA: Su intensidad de iluminacion es MEDIA\0");
+							opcion=1; usart1_sendStr("OPCION VALIDA: Su intensidad de iluminacion es MEDIA\0");
 							LCDstring("MEDIA",5);
 						break;
 						case '3': 
-							valor_LDR = MAXLUX; opcion=2; usart1_sendStr("OPCION VALIDA: Su intensidad de iluminacion es ALTA\0");
+							opcion=2; usart1_sendStr("OPCION VALIDA: Su intensidad de iluminacion es ALTA\0");
 							LCDstring("ALTA ",5);
 						break;
 						default:

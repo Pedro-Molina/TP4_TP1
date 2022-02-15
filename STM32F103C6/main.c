@@ -21,7 +21,7 @@ static volatile char prueba[]= "odio proteus";
 static uint8_t flag_mef = 0;
 
 
-void USART1_IRQHandler() { /* USART1 interrupt routine */
+void USART1_IRQHandler  () { /* USART1 interrupt routine */
 char c = USART1->DR; /* get received data */
  if (c != '\n'){
 	   if (c == '\r'){  //SI ES CARACTER DE FIN DE CADENA
